@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "executedTests": 4,
+  "checks": [
+    {
+      "project": "_Organized Desktop/05 Numbered Experiments/ww6",
+      "id": "79c315026b95",
+      "command": [
+        "node",
+        "--experimental-vm-modules",
+        "--test",
+        "tests/runtime-allocation-state-lab.test.mjs"
+      ],
+      "cwd": "C:\\Users\\Owner\\Desktop\\AstraOrganized2\\astra-remaining-improvements\\stage\\79c315026b95",
+      "environmentOverrides": {},
+      "startedAt": "2026-09-22T03:59:27.473580+00:00",
+      "status": "complete",
+      "log": "crud-b07-astra-runtime2.log",
+      "pid": 22820,
+      "exitCode": 0,
+      "passed": true,
+      "finishedAt": "2026-09-22T03:59:37.513610+00:00",
+      "elapsedSeconds": 10.03
+    }
+  ],
+  "limits": [
+    "No Prisma worker, claim, aggregation, rollup, audit, failure recovery, or retry execution.",
+    "Provider-backed queue checks remain follow-up work.",
+    "Real ValidationError is loaded. Unexecuted repository/engine exports and queue registration are adapted. Worker catch directly writes FAILED without transition guard; terminal helper refusal does not certify worker immutability."
+  ]
+}

@@ -1,0 +1,6 @@
+# Separate solutions and review rubric
+
+Level 1: PENDING targets RUNNING and FAILED; RUNNING targets COMPLETED and FAILED; COMPLETED and FAILED are terminal. Level 2 rejects with a validation error because completion without execution skips work. Level 3 proposes no computation after a failed conditional claim; this is a future design requirement, not current runtime evidence. Level 4 intends FAILED, but persistence and original-error behavior require worker tests. Level 5 needs an explicit product decision and new transition or replacement run semantics.
+
+Review the lab for actual production-module execution, full legal-edge coverage, invalid-edge coverage, and stated limits. It earns state-policy credit, not queue or database credit. Reject a copied state table or a test that calls only array membership. Ask whether service callers check update counts and whether repositories include tenantId. Ask whether failure marking can downgrade a terminal run; that is a separate worker-level review and remains unverified here. Good review separates policy evidence from persistence evidence.
+Inspection supplies one concrete answer: failure marking does bypass the transition guard, and there is no atomic claim in the shown worker. A reviewer must not extend terminal-policy test results to those unguarded writes.
