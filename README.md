@@ -42,6 +42,16 @@ NEXT_PUBLIC_DEMO_USER_ID="<seeded-admin-user-id>"
 npm run dev
 ```
 
+## Tests
+- `npm test` runs the four Vitest files under `tests/**` (`vitest.config.ts` includes only `tests/**/*.test.ts`).
+- The allocation-run state lab is separate: `node --experimental-vm-modules --test tests/runtime-allocation-state-lab.test.mjs`. See `astraupskill/VERIFICATION.md` for what it does and does not cover.
+
+## Known limitations (by design for a learning project)
+- Auth is a bare `x-user-id` header resolved in `src/lib/auth/session.ts`; it is not a real session.
+- Allocation runs use an in-process `setTimeout` queue (`src/lib/queue/allocationQueue.ts`); a restart loses queued work and leaves runs PENDING.
+- Send `monthStart` as the first instant of a UTC month (e.g. `2026-03-01T00:00:00.000Z`). Runs store the value as given, and the chargeback report looks runs up by exact `monthStart` equality.
+
 ## Key Docs
 - Architecture: `docs/architecture/`
 - Learning traces: `docs/learning/`
+- Allocation-run workshop with exercises and a senior review: `astraupskill/`

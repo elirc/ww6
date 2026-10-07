@@ -1,21 +1,37 @@
 # Verification and limits
 
-Executed from the staged `ww6` project:
+## The lab command
 
 ```text
 node --experimental-vm-modules --test tests/runtime-allocation-state-lab.test.mjs
 ```
 
-Four policy cases passed: PENDING legal targets, RUNNING legal targets with terminal refusal, direct PENDING-to-COMPLETED refusal, and invalid-transition error detail. The actual production transition guard was loaded through the VM helper. Results are in [evidence/results.json](evidence/results.json), with the TAP log at [evidence/crud-b07-astra-runtime2.log](evidence/crud-b07-astra-runtime2.log).
+This is separate from `npm test`; Vitest collects only `tests/**/*.test.ts` (`vitest.config.ts:13`).
 
-Only the malformed route-reference comment in the real error module was corrected; runtime error behavior is unchanged. The lab does not execute Prisma, worker claiming, aggregation, allocation result replacement, audit persistence, failure recovery, or retry policy. Those limits are material and require provider-backed tests before release. This evidence supports the pure run-state contract only. The handoff records the exact command and count so policy execution is not confused with full queue verification. This distinction keeps the review honest about what actually executed.
- 
- The exact command and result count make this boundary reviewable for junior and senior readers alike.
+The four policy cases are: PENDING legal targets (`tests/runtime-allocation-state-lab.test.mjs:12`), RUNNING legal targets (`:13`), terminal and skipped-phase refusal with status 422 and code `VALIDATION_ERROR` (`:14`), and invalid-transition error detail (`:15`). The actual production transition guard and the actual `ValidationError` are loaded through the VM helper; the repository, engine and queue modules are stubbed (`:7-11`) so that importing the service does not register a real worker.
 
-The actual ValidationError exposes statusCode422 and code VALIDATION_ERROR. Queue registration is adapted to prevent import-time worker scheduling. The worker catch writes FAILED directly, even after a transition error; therefore the helper tests do not prove terminal records cannot be downgraded by the worker. That behavior requires a separate guarded-failure design and runtime tests.
+## Recorded evidence
 
-The initial real-error run failed during TypeScript parsing because a route glob inside the block comment contained a closing-comment token. Rewording that comment made the actual module parse; this is why replacing error doubles matters. Earlier failed evidence remains preserved in the workspace.
+[`evidence/results.json`](evidence/results.json) records this command as executed during the improvement pass and lists its own limits: no Prisma worker, claim, aggregation, rollup, audit, failure recovery or retry execution, and the note that the worker catch writes FAILED without the transition guard. The TAP log it references (`crud-b07-astra-runtime2.log`) is not committed to this repository, so only the JSON summary can be inspected here. These docs did not re-run the command.
 
-## Astra execution evidence
+## The one production change
 
-The captured focused production-source suite executed 4 tests: all passed, zero failed and zero skipped. Read the [captured output](evidence/crud-b07-astra-runtime2.log) and [exact command and limits](evidence/results.json). Earlier check records remain preserved in the workspace.
+Only the malformed header comment in `src/lib/http/errors.ts` was changed: the original contained `**/` inside a block comment, which terminated the comment early and broke parsing of the real module (see [the snapshot](snapshots/errors.ts.original.txt)). Runtime behaviour of the error classes is unchanged. Loading the real module rather than an error double is what exposed the problem.
+
+## What is not verified
+
+- Prisma queries, tenant predicates, the result-replacement transaction.
+- Worker claiming, duplicate delivery, crash recovery, retry policy.
+- The engine's arithmetic, rounding and the >100% guard.
+- Any route, `withRole`/`withAuth` wiring, or `toErrorResponse` mapping.
+- That terminal records cannot be downgraded — they can, by inspection of `src/services/allocationRunService.ts:102-113`.
+
+This evidence supports the pure run-state contract only. Those limits are material and require provider-backed tests before release.
+
+## Verify it yourself
+
+**Goal:** reproduce the lab result.
+**Check:** after installing dependencies, the node test runner reports 4 passing and 0 failing for the file above.
+
+**Goal:** confirm the comment fix matters.
+**Check:** temporarily restoring the snapshot's header (locally, not committed) makes the lab fail at module load rather than at an assertion.
